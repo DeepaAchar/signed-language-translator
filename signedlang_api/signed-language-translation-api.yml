@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: Signed Language Translation API
+  version: 1.0.0
+  description: RESTful APIs for translating between signed gestures, speech, and video.
+
+servers:
+  - url: https://api.signtranslate.ai/v1
+    description: Production server
+
+paths:
+  /supported-gestures:
+    get:
+      summary: Retrieve list of supported sign language gestures
+      responses:
+        '200':
+          description: List of gestures available in the system
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gestures:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /translation-status/{jobId}:
+    get:
+      summary: Check the real-time status of a translation job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "abc123"
+      responses:
+        '200':
+          description: Status of requested translation job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed]
+                  message:
+                    type: string
+        '404':
+          description: Job not found
+        '500':
+          description: Internal server error
+
+  /translation-result/{jobId}:
+    get:
+      summary: Fetch the final result of a completed translation
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Translation output (video or text)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    enum: [text, video]
+                  data:
+                    type: string
+                    description: Translated text or video URL
+        '404':
+          description: Translation result not found
+        '500':
+          description: Internal server error
+
+  /gesture-recognition:
+    post:
+      summary: Process video input to identify sign gestures
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Sign language video input
+      responses:
+        '200':
+          description: Recognized gestures with confidence scores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gestures:
+                    type: array
+                    items:
+                      type: string
+                  confidence:
+                    type: number
+                    format: float
+        '201':
+          description: Resource successfully created (placeholder if applicable)
+        '400':
+          description: Bad request – Invalid or missing video input
+        '401':
+          description: Unauthorized – Missing or invalid authentication
+        '402':
+          description: Payment required (if monetization applies)
+        '403':
+          description: Forbidden – User lacks permission to use this resource
+        '404':
+          description: Not found – Resource or endpoint missing
+        '500':
+          description: Internal server error – Unexpected processing failure
+
+
+  /speech-to-text:
+    post:
+      summary: Convert spoken language into transcribed text
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: Audio file (e.g., WAV, MP3)
+      responses:
+        '200':
+          description: Recognized gestures with confidence scores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gestures:
+                    type: array
+                    items:
+                      type: string
+                  confidence:
+                    type: number
+                    format: float
+        '201':
+          description: Resource successfully created (placeholder if applicable)
+        '400':
+          description: Bad request – Invalid or missing video input
+        '401':
+          description: Unauthorized – Missing or invalid authentication
+        '402':
+          description: Payment required (if monetization applies)
+        '403':
+          description: Forbidden – User lacks permission to use this resource
+        '404':
+          description: Not found – Resource or endpoint missing
+        '500':
+          description: Internal server error – Unexpected processing failure
+
+  /text-to-sign-video:
+    post:
+      summary: Generate sign language animation from text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "Welcome to the translation demo"
+      responses:
+        '200':
+          description: Recognized gestures with confidence scores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gestures:
+                    type: array
+                    items:
+                      type: string
+                  confidence:
+                    type: number
+                    format: float
+        '201':
+          description: Resource successfully created (placeholder if applicable)
+        '400':
+          description: Bad request – Invalid or missing video input
+        '401':
+          description: Unauthorized – Missing or invalid authentication
+        '402':
+          description: Payment required (if monetization applies)
+        '403':
+          description: Forbidden – User lacks permission to use this resource
+        '404':
+          description: Not found – Resource or endpoint missing
+        '500':
+          description: Internal server error – Unexpected processing failure
+
+  /feedback:
+    post:
+      summary: Collect user feedback for model performance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endpoint:
+                  type: string
+                  example: "/gesture-recognition"
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+                  example: "Gesture recognition missed handshapes in fast motion."
+      responses:
+        '200':
+          description: Recognized gestures with confidence scores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gestures:
+                    type: array
+                    items:
+                      type: string
+                  confidence:
+                    type: number
+                    format: float
+        '201':
+          description: Resource successfully created (placeholder if applicable)
+        '400':
+          description: Bad request – Invalid or missing video input
+        '401':
+          description: Unauthorized – Missing or invalid authentication
+        '402':
+          description: Payment required (if monetization applies)
+        '403':
+          description: Forbidden – User lacks permission to use this resource
+        '404':
+          description: Not found – Resource or endpoint missing
+        '500':
+          description: Internal server error – Unexpected processing failure
+
